@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HomeView from '@/components/HomeView'
 import IndexView from '@/components/IndexView'
+import HomeView from '@/components/HomeView'
+import Chat from '@/components/chat'
 
 Vue.use(Router)
 
@@ -16,6 +17,11 @@ export default new Router({
       path: '/home', 
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/chat', 
+      name: 'chat',
+      component: Chat
     }
   ]
 })

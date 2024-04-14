@@ -2,7 +2,7 @@
     <div id="app">
         <div class="fixed-tab">
             <img src="../assets/logo_index.png" alt="" class="tab-image">
-            <router-link to="/">Home</router-link>
+            <router-link to="/chat">Chat</router-link>
             <router-link to="/">About</router-link>
         </div>
         <vue-particles
