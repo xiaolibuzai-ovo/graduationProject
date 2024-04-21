@@ -15,6 +15,11 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 	api := router.Group("api")
 	{
 		api.GET("test", handlers.Test)
+		wsApi := api.Group("ws")
+		{
+			wsApi.GET("add", handlers.AddWsConnection)
+
+		}
 	}
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")

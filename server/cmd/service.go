@@ -19,8 +19,10 @@ func NewService() Service {
 }
 
 func (s *service) NewHandlers() router.Handlers {
-	config.InitSQLiteDB()
+	db := config.InitSQLiteDB()
 	fmt.Println("SQLite db init success")
+	redisDb := config.NewRedisClient()
+	fmt.Println("redis db init success")
 
 	return &router.HandlersImpl{
 		TestHandler: handler.NewTestHandler(),

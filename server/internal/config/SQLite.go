@@ -4,17 +4,8 @@ import (
 	"database/sql"
 )
 
-var (
-	db *sql.DB
-)
-
-func GetDb() *sql.DB {
-	return db
-}
-
-func InitSQLiteDB() {
-	var err error
-	db, err = sql.Open("sqlite3", "./mock.db")
+func InitSQLiteDB() *sql.DB {
+	db, err := sql.Open("sqlite3", "./mock.db")
 	if err != nil {
 		panic(err)
 	}
@@ -23,8 +14,8 @@ func InitSQLiteDB() {
 	if err != nil {
 		panic(err)
 	}
+	return db
 }
-
 func createTestDb(db *sql.DB) error {
 	// 创建订单表
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS orders (
