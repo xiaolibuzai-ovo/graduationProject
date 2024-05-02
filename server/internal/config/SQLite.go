@@ -17,7 +17,6 @@ func InitSQLiteDB() *sql.DB {
 	return db
 }
 func createTestDb(db *sql.DB) error {
-	// 创建订单表
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY,
         uid INTEGER,

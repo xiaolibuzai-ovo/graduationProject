@@ -1,39 +1,49 @@
 package wsHandler
 
 import (
-	"fmt"
 	"server/internal/logic/ws"
 	"server/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 type WsHandler interface {
-	AddWsConnection(c *gin.Context)
+	SendQuestion(c *gin.Context)
 }
 
 type wsHandler struct {
-	ws.WsLogic
+	wsLogic.WsLogic
 }
 
-func NewWsHandler(logic ws.WsLogic) WsHandler {
+func NewWsHandler(logic wsLogic.WsLogic) WsHandler {
 	return &wsHandler{
 		WsLogic: logic,
 	}
 }
 
-func (w *wsHandler) AddWsConnection(c *gin.Context) {
-	// 升级并建立ws连接
-	err := w.WsLogic.CreateWsConnection(c.Writer, c.Request)
+func (w *wsHandler) SendQuestion(c *gin.Context) {
+	// 获取WebSocket连接
+	wsConn, err := websocket.Upgrade(c.Writer, c.Request, nil, 1024, 1024)
 	if err != nil {
-		fmt.Printf("[AddWsConnection] createWsConnection err,err=%v", err)
-		utils.ErrorInternalServerResponse(c, err)
+		utils.ErrorBadRequestResponse(c, err)
 		return
 	}
-
-	// 检测心跳
-	go w.WsLogic.HeartBeatCheck()
-	// 循环推送消息
-	go w.WsLogic.PushLoop()
-
+	for {
+		mt, message, err := wsConn.ReadMessage()
+		if err != nil {
+			utils.ErrorInternalServerResponse(c, err)
+			return
+		}
+		resp, err := w.WsLogic.SendQuestion(c.Request.Context(), string(message))
+		if err != nil {
+			utils.ErrorInternalServerResponse(c, err)
+			return
+		}
+		err = wsConn.WriteMessage(mt, []byte(resp))
+		if err != nil {
+			utils.ErrorInternalServerResponse(c, err)
+			return
+		}
+	}
 }

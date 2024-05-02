@@ -8,7 +8,10 @@ import (
 
 func NewRouter(handlers Handlers) (http.Handler, error) {
 	router := gin.New()
-	router.Use()
+	gin.SetMode(gin.DebugMode)
+	router.Use(
+		gin.Logger(),
+	)
 	router.GET("", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
@@ -17,8 +20,7 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 		api.GET("test", handlers.Test)
 		wsApi := api.Group("ws")
 		{
-			wsApi.GET("add", handlers.AddWsConnection)
-
+			wsApi.GET("send", handlers.SendQuestion)
 		}
 	}
 	router.NoRoute(func(c *gin.Context) {

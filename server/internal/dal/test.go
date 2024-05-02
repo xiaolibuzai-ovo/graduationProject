@@ -2,8 +2,6 @@ package dal
 
 import (
 	"context"
-	"database/sql"
-	"server/internal/config"
 )
 
 type TestDal interface {
@@ -11,13 +9,10 @@ type TestDal interface {
 }
 
 type testDal struct {
-	db *sql.DB
 }
 
 func NewTestDal() TestDal {
-	return &testDal{
-		db: config.GetDb(),
-	}
+	return &testDal{}
 }
 
 func (t *testDal) Test(ctx context.Context) {

@@ -33,9 +33,14 @@
 </template>
 
 <script>
+import WebSocket from 'websocket'; // 或者使用 import WebSocket from 'socket.io-client';
+import { w3cwebsocket } from 'websocket'; // 或者使用 import { io } from 'socket.io-client';
+
+
 export default {
   data() {
     return {
+      socket: null,
       showHistory: true,
       historyMessages: [
         { text: "这是历史消息1" },
@@ -56,21 +61,46 @@ export default {
       { text: "好的，请问有什么具体的需求或问题？", sender: 'bot' }
       // 可以继续添加更多模拟的聊天记录
     ];
+
+    this.initWebSocket();
   },
   methods: {
     toggleHistory() {
       this.showHistory = !this.showHistory;
     },
+    initWebSocket() {
+      // 创建WebSocket连接
+      this.socket = new w3cwebsocket('ws://localhost:8888/api/ws/send'); // 这里替换成你的WebSocket服务器地址
+
+      // 监听WebSocket事件
+      this.socket.onopen = () => {
+        console.log("WebSocket连接已建立")
+      };
+
+      this.socket.onmessage = (event) => {
+        console.log('收到消息:', event.data);
+        this.messages.push({ text: event.data, sender: 'bot' });
+        this.scrollToBottom();
+      };
+
+      this.socket.onclose = () => {
+        console.log('WebSocket连接已关闭');
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket出错:', error);
+      };
+    },
     sendMessage() {
       if (!this.userMessage.trim()) return;
       this.messages.push({ text: this.userMessage, sender: 'user' });
+      this.socket.send(this.userMessage);
+
       this.userMessage = '';
       // 模拟接收到消息的回复，这里可以使用异步操作模拟机器人或服务端的响应
-      setTimeout(() => {
-        this.messages.push({ text: "这是机器人的回复...", sender: 'bot' });
-        this.scrollToBottom();
-      }, 10);
-
+      // setTimeout(() => {
+      //   this.messages.push({ text: "这是机器人的回复...", sender: 'bot' });
+      // }, 10);
     },
     scrollToBottom() {
       // 使用 $nextTick 确保 Vue 更新完 DOM 后再进行滚动操作
@@ -117,7 +147,7 @@ export default {
 
 /* 历史消息展开/折叠按钮图标样式 */
 .history-toggle i {
-  margin-left: 5px; 
+  margin-left: 5px;
 }
 
 /* 历史消息内容区域样式 */

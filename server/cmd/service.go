@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"server/internal/config"
+	"github.com/tmc/langchaingo/llms/openai"
 	"server/internal/handler"
+	wsHandler "server/internal/handler/ws"
+	wsLogic "server/internal/logic/ws"
 	"server/internal/router"
 )
 
@@ -19,12 +20,15 @@ func NewService() Service {
 }
 
 func (s *service) NewHandlers() router.Handlers {
-	db := config.InitSQLiteDB()
-	fmt.Println("SQLite db init success")
-	redisDb := config.NewRedisClient()
-	fmt.Println("redis db init success")
-
+	//db := config.InitSQLiteDB()
+	//fmt.Println("SQLite db init success")
+	//_ = db
+	langChainGo, err := openai.New()
+	if err != nil {
+		panic(err)
+	}
 	return &router.HandlersImpl{
 		TestHandler: handler.NewTestHandler(),
+		WsHandler:   wsHandler.NewWsHandler(wsLogic.NewWsLogic(langChainGo)),
 	}
 }
