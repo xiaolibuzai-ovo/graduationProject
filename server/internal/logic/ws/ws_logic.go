@@ -28,8 +28,10 @@ func (w *wsLogic) SendQuestion(ctx context.Context, message string) (string, err
 	}
 	response, err := w.langChainGo.GenerateContent(ctx, messages)
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	} else if len(response.Choices) == 0 {
+		fmt.Println("response is empty")
 		return "", fmt.Errorf("response is empty")
 	}
 	return response.Choices[0].Content, nil

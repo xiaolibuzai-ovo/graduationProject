@@ -1,6 +1,7 @@
 package wsHandler
 
 import (
+	"fmt"
 	"server/internal/logic/ws"
 	"server/internal/utils"
 
@@ -32,17 +33,17 @@ func (w *wsHandler) SendQuestion(c *gin.Context) {
 	for {
 		mt, message, err := wsConn.ReadMessage()
 		if err != nil {
-			utils.ErrorInternalServerResponse(c, err)
+			fmt.Println(err)
 			return
 		}
 		resp, err := w.WsLogic.SendQuestion(c.Request.Context(), string(message))
 		if err != nil {
-			utils.ErrorInternalServerResponse(c, err)
+			fmt.Println(err)
 			return
 		}
 		err = wsConn.WriteMessage(mt, []byte(resp))
 		if err != nil {
-			utils.ErrorInternalServerResponse(c, err)
+			fmt.Println(err)
 			return
 		}
 	}

@@ -2,6 +2,7 @@
   <div class="chat-container">
     <!-- 左侧历史消息区域 -->
     <div class="history-container">
+      <el-button type="primary" @click="clickMenu">返回</el-button>
       <!-- <button @click="toggleHistory" class="history-toggle"> -->
         <!-- 历史记录 -->
         <!-- <i :class="['fas', showHistory ? 'fa-chevron-up' : 'fa-chevron-down']"></i> -->
@@ -33,9 +34,7 @@
 </template>
 
 <script>
-import WebSocket from 'websocket'; // 或者使用 import WebSocket from 'socket.io-client';
-import { w3cwebsocket } from 'websocket'; // 或者使用 import { io } from 'socket.io-client';
-
+import { w3cwebsocket } from 'websocket';
 
 export default {
   data() {
@@ -64,7 +63,19 @@ export default {
 
     this.initWebSocket();
   },
+  watch:{
+    $router:{
+        handler(){
+          //打印id
+          console.log(this.$route.query.id);
+        },
+        immediate:true
+    }
+  },
   methods: {
+    clickMenu() {
+      this.$router.push('/agents');
+    },
     toggleHistory() {
       this.showHistory = !this.showHistory;
     },
@@ -94,6 +105,7 @@ export default {
     sendMessage() {
       if (!this.userMessage.trim()) return;
       this.messages.push({ text: this.userMessage, sender: 'user' });
+      console.log(this.userMessage)
       this.socket.send(this.userMessage);
 
       this.userMessage = '';

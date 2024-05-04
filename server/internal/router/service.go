@@ -6,11 +6,11 @@ import (
 )
 
 type Handlers interface {
-	handler.TestHandler
+	handler.AgentHandler
 	wsHandler.WsHandler
 }
 
 type HandlersImpl struct {
-	handler.TestHandler
+	handler.AgentHandler
 	wsHandler.WsHandler
 }
