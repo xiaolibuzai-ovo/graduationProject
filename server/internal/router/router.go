@@ -22,11 +22,19 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 		agentApi := api.Group("agent")
 		{
 			agentApi.GET("list", handlers.AgentList)
+			agentApi.POST("detail", handlers.AgentDetail)
 			agentApi.POST("embedding", handlers.Embedding) // 嵌入向量
+			agentApi.POST("paper", handlers.PaperAgent)
+			agentApi.POST("suggests")
 		}
 		wsApi := api.Group("ws")
 		{
 			wsApi.GET("send", handlers.SendQuestion)
+			wsApi.GET("saveEarthAgent", handlers.SaveEarthAgent)
+		}
+		msgApi := api.Group("message")
+		{
+			msgApi.POST("messages", handlers.GetHistoryMessage)
 		}
 	}
 	router.NoRoute(func(c *gin.Context) {

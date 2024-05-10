@@ -11,6 +11,7 @@ import (
 
 type WsHandler interface {
 	SendQuestion(c *gin.Context)
+	SaveEarthAgent(c *gin.Context)
 }
 
 type wsHandler struct {
@@ -46,5 +47,38 @@ func (w *wsHandler) SendQuestion(c *gin.Context) {
 			fmt.Println(err)
 			return
 		}
+	}
+}
+
+func (w *wsHandler) SaveEarthAgent(c *gin.Context) {
+	wsConn, err := websocket.Upgrade(c.Writer, c.Request, nil, 1024, 1024)
+	if err != nil {
+		utils.ErrorBadRequestResponse(c, err)
+		return
+	}
+	var saveEarthAgentChan = make(chan string, 10)
+
+	for {
+		mt, message, err := wsConn.ReadMessage()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		go func() {
+			err := w.WsLogic.SaveEarthAgent(c.Request.Context(), string(message), saveEarthAgentChan)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}()
+		for msg := range saveEarthAgentChan {
+			err = wsConn.WriteMessage(mt, []byte(msg))
+			if err != nil {
+				fmt.Println(err)
+			}
+			if msg == "ok" {
+				break
+			}
+		}
+		wsConn.WriteMessage(mt, []byte("ok")) // 表示一次消息发送完成
 	}
 }

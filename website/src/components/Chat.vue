@@ -1,75 +1,80 @@
 <template>
   <div class="chat-container">
-    <!-- 左侧历史消息区域 -->
-    <div class="history-container">
-      <el-button type="primary" @click="clickMenu">返回</el-button>
-      <!-- <button @click="toggleHistory" class="history-toggle"> -->
-        <!-- 历史记录 -->
-        <!-- <i :class="['fas', showHistory ? 'fa-chevron-up' : 'fa-chevron-down']"></i> -->
-      <!-- </button> -->
-      <div v-show="showHistory" class="history-messages">
-        <!-- 显示历史消息 -->
-        <div v-for="(message, index) in historyMessages" :key="index" class="history-message">
-          {{ message.text }}
-        </div>
-      </div>
-    </div>
-
-    <!-- 右侧实时聊天消息区域和输入框 -->
+    <!-- 实时聊天消息区域和输入框 -->
+    <el-button class="back-btn" type="primary" @click="clickMenu">返回</el-button>
     <div class="chat-messages-container">
       <div class="chat-messages" ref="chatMessages">
         <div class="message-top"></div>
         <!-- 显示实时聊天消息 -->
         <div v-for="(message, index) in messages" :key="index" :class="['chat-message', message.sender]">
-          <div class="avatar" :class="{ 'avatar-right': message.sender === 'user', 'avatar-left': message.sender === 'bot' }"></div>
+          <div class="avatar"
+               :class="{ 'avatar-right': message.sender === 'user', 'avatar-left': message.sender === 'bot' }"
+          ></div>
           <div class="message-text">{{ message.text }}</div>
         </div>
       </div>
       <div class="input-container">
-        <input v-model="userMessage" @keyup.enter="sendMessage" type="text" class="input-box" placeholder="请输入你的问题..." />
+        <input :disabled="disabled" v-model="userMessage" @keyup.enter="sendMessage" type="text" class="input-box"
+               :placeholder="placeholder"/>
         <button @click="sendMessage" class="send-button">发送</button>
+      </div>
+    </div>
+
+    <!-- 历史消息区域 -->
+    <div class="right-container">
+      <div class="agent-info">
+        {{ agentInfo }}
+      </div>
+      <div class="suggest">
+        <div style=" padding-top: 10%; margin-left: 5%; font-size: 26px">
+          推荐的谈话
+        </div>
+        <div v-for="(message, index) in suggestions" :key="index" class="suggest-item">
+          <span style="padding-left: 12px;">
+            {{ message.text }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { w3cwebsocket } from 'websocket';
+import {w3cwebsocket} from 'websocket';
 
 export default {
   data() {
     return {
       socket: null,
-      showHistory: true,
-      historyMessages: [
-        { text: "这是历史消息1" },
-        { text: "这是历史消息2" },
-        { text: "这是历史消息3" },
-        { text: "这是历史消息4" }
-      ],
+      agentInfo: '',
+      greetings: '',
       messages: [],
-      userMessage: ''
+      userMessage: '',
+      unCompleteMsg: [],
+      disabled: false,
+      placeholder: '请输入你的问题...',
+      suggestions: [
+        {
+          text: "suggest1"
+        },
+        {
+          text: "suggest2"
+        }
+      ],
     };
   },
   created() {
-    // 在组件创建时，添加一些模拟的聊天记录
-    this.messages = [
-      { text: "你好！", sender: 'user' },
-      { text: "你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？你好，有什么需要帮助的吗？", sender: 'bot' },
-      { text: "我想了解一下聊天界面的布局。", sender: 'user' },
-      { text: "好的，请问有什么具体的需求或问题？", sender: 'bot' }
-      // 可以继续添加更多模拟的聊天记录
-    ];
-
+    this.getChatDetail(this.$route.query.id)
+    this.getHistory(this.$route.query.id)
     this.initWebSocket();
   },
-  watch:{
-    $router:{
-        handler(){
-          //打印id
-          console.log(this.$route.query.id);
-        },
-        immediate:true
+  watch: {
+    $router: {
+      handler() {
+        //打印id
+        console.log(this.$route.query.id);
+      },
+      immediate: true
     }
   },
   methods: {
@@ -79,9 +84,66 @@ export default {
     toggleHistory() {
       this.showHistory = !this.showHistory;
     },
+    getChatDetail(id) {
+      if (id === '99') {
+        this.agentInfo = 'I\'m Gordon Ramsay, taking you on a wild culinary ride. We\'re uncovering the best restaurants, revealing hidden gems, and savoring diverse cuisines. Join me on this delicious journey! It\'s gonna be a mouthwatering experience!'
+        this.greetings = 'Hey Ranger, you have been placed on Earth, a beautiful planet teeming with amazing life and wonderful sights. Unfortunately, our lovely planet is dying. With a current health of 30%, you can\'t let that happen. It\'s up to you to preserve its beauty and protect it from utmost destruction. Through your actions and decisions, let\'s heal the Earth. Are you ready?'
+        this.messages.push({
+          text: this.greetings,
+          sender: 'bot'
+        })
+      } else {
+        axios({
+          method: 'post',
+          url: 'http://localhost:8888/api/agent/detail',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: {
+            agentId: parseInt(id)
+          }
+        })
+          .then(response => {
+            this.agentInfo = response.data.data['agentInfo']
+            this.greetings = response.data.data['greetings']
+            this.messages.push({
+              text: this.greetings,
+              sender: 'bot'
+            })
+          })
+          .catch(error => {
+            console.error('There was an error!', error);
+          });
+      }
+    },
+    getHistory(id) {
+      axios({
+        method: 'post',
+        url: 'http://localhost:8888/api/message/messages',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          agentId: parseInt(id)
+        }
+      })
+        .then(response => {
+          this.messages.push(...response.data.data)
+          // this.messages = response.data.data
+        })
+        .catch(error => {
+          console.error('There was an error!', error);
+        });
+    },
     initWebSocket() {
+      let wsUrl = ''
+      if (this.$route.query.id === '99') {
+        wsUrl = 'ws://localhost:8888/api/ws/saveEarthAgent'
+      } else {
+        wsUrl = 'ws://localhost:8888/api/ws/send'
+      }
       // 创建WebSocket连接
-      this.socket = new w3cwebsocket('ws://localhost:8888/api/ws/send'); // 这里替换成你的WebSocket服务器地址
+      this.socket = new w3cwebsocket(wsUrl); // 这里替换成你的WebSocket服务器地址
 
       // 监听WebSocket事件
       this.socket.onopen = () => {
@@ -89,8 +151,16 @@ export default {
       };
 
       this.socket.onmessage = (event) => {
-        console.log('收到消息:', event.data);
-        this.messages.push({ text: event.data, sender: 'bot' });
+        if (event.data === 'ok') {
+          // 一次消息输出完成
+          this.disabled = false
+          this.placeholder = '请输入你的问题...'
+          this.unCompleteMsg = []
+        } else {
+          this.unCompleteMsg.push(event.data)
+          this.messages.pop()
+          this.messages.push({text: this.unCompleteMsg.join(''), sender: 'bot'})
+        }
         this.scrollToBottom();
       };
 
@@ -104,15 +174,14 @@ export default {
     },
     sendMessage() {
       if (!this.userMessage.trim()) return;
-      this.messages.push({ text: this.userMessage, sender: 'user' });
+      this.disabled = true
+      this.placeholder = '结果输出中,请不要重复输入...'
+      this.messages.push({text: this.userMessage, sender: 'user'});
+      this.messages.push({text: '', sender: 'bot'});
       console.log(this.userMessage)
       this.socket.send(this.userMessage);
 
       this.userMessage = '';
-      // 模拟接收到消息的回复，这里可以使用异步操作模拟机器人或服务端的响应
-      // setTimeout(() => {
-      //   this.messages.push({ text: "这是机器人的回复...", sender: 'bot' });
-      // }, 10);
     },
     scrollToBottom() {
       // 使用 $nextTick 确保 Vue 更新完 DOM 后再进行滚动操作
@@ -131,30 +200,38 @@ export default {
 /* 整个聊天界面容器 */
 .chat-container {
   display: flex; /* 使用 flex 布局 */
-  height: 100vh; /* 设置容器高度为整个视窗的高度 */
+  height: 98vh; /* 设置容器高度为整个视窗的高度 */
 
   /* 设置 flex-direction 为 column，使子元素垂直排列 */
   flex-direction: row;
 }
 
 /* 左侧历史消息区域容器 */
-.history-container {
-  flex: 1; /* 左侧容器占据比例为 1 */
+.right-container {
+  flex: 1.5; /* 左侧容器占据比例为 1 */
   overflow-y: auto; /* 当内容溢出时显示垂直滚动条 */
   padding: 10px; /* 设置内边距 */
-  border-right: 1px solid #ccc; /* 右侧边框线 */
+  height: 100%;
+  width: 400px;
+  background-color: #f1efef;
 }
 
-/* 历史消息展开/折叠按钮样式 */
-.history-toggle {
-  cursor: pointer; /* 鼠标指针样式为指针 */
-  background-color: #f0f0f0; /* 设置背景颜色 */
-  border: none; /* 清除边框 */
-  padding: 8px 12px; /* 设置内边距 */
-  text-align: left; /* 文本左对齐 */
-  width: 100%; /* 按钮宽度占据父容器宽度 */
-  display: flex; /* 使用 flex 布局 */
-  justify-content: space-between; /* 子元素平均分布 */
+.agent-info {
+  width: 460px;
+  height: 100px;
+  margin-left: 5%;
+  margin-top: 10%;
+}
+
+.suggest-item {
+  margin-left: 5%;
+  padding-right: 15%;
+  margin-top: 3%;
+  background-color: white;
+  width: 75%;
+  height: 55px;
+  border-radius: 10px;
+  line-height: 55px;
 }
 
 /* 历史消息展开/折叠按钮图标样式 */
@@ -162,21 +239,14 @@ export default {
   margin-left: 5px;
 }
 
-/* 历史消息内容区域样式 */
-.history-messages {
-  padding-top: 10px; /* 顶部内边距 */
-}
-
-/* 单条历史消息样式 */
-.history-message {
-  background-color: #f0f0f0; /* 设置背景颜色 */
-  padding: 8px 12px; /* 设置内边距 */
-  margin-bottom: 5px; /* 底部间距 */
+.back-btn {
+  position: fixed;
+  left: 0;
 }
 
 /* 右侧实时聊天消息区域容器 */
 .chat-messages-container {
-  flex: 4; /* 右侧容器占据比例为 4 */
+  flex: 3; /* 右侧容器占据比例为 4 */
   display: flex; /* 使用 flex 布局 */
   flex-direction: column; /* 垂直方向排列子元素 */
 }
@@ -188,7 +258,8 @@ export default {
 
 /* 实时聊天消息展示区域样式 */
 .chat-messages {
-  flex: 1; /* 子元素占据剩余空间 */
+  /*flex: 2; !* 子元素占据剩余空间 *!*/
+  height: 70%;
   overflow-y: auto; /* 当内容溢出时显示垂直滚动条 */
   padding: 10px; /* 设置内边距 */
 }
@@ -231,43 +302,52 @@ export default {
   /* 用户发送的消息，头像在右侧 */
   order: 1; /* 调整头像的显示顺序 */
   margin-left: 8px;
-  background: red;
+  /*background: red;*/
+  background-size: cover;
+  background-image: url('../assets/user.png');
 }
 
 .avatar-left {
   /* AI回复的消息，头像在左侧 */
   /* order: 1; 调整头像的显示顺序 */
   margin-right: 10px;
-  background: blue;
+  background-size: cover;
+  background-image: url('../assets/bot.jpeg');
 }
 
 /* 输入框及发送按钮容器样式 */
 .input-container {
+  position: relative;
+  margin: auto;
+  bottom: 0;
   display: flex; /* 使用 flex 布局 */
   align-items: center; /* 垂直居中对齐 */
   justify-content: center; /* 水平居中对齐 */
   padding: 10px; /* 设置内边距 */
-  border-top: 1px solid #ccc;
+  border-radius: 20px;
+  width: 85%;
+  /*border: 1px solid red;*/
 }
 
 /* 输入框样式 */
 .input-box {
-  width: 80%; /* 输入框宽度为父元素宽度的 80% */
-  height: 40px; /* 设置输入框高度为 40 像素 */
-  padding: 8px; /* 设置内边距 */
-  box-sizing: border-box; /* 设置盒模型为 border-box，包含 padding 在内 */
-  border-radius: 4px; /* 设置边框圆角 */
+  width: 70%; /* 输入框宽度为父元素宽度的 80% */
+  height: 50px; /* 设置输入框高度为 40 像素 */
+  border-radius: 20px; /* 设置边框圆角 */
   font-size: 16px; /* 设置字体大小 */
-  border: none; /* 去掉输入框的边框 */
   outline: none; /* 去掉输入框的聚焦时的外边框 */
+  padding-left: 20px;
 }
 
 /* 发送按钮样式 */
 .send-button {
+  width: 60px;
+  height: 50px;
   padding: 8px 16px; /* 设置内边距 */
   background-color: #007bff; /* 蓝色背景 */
   color: #fff; /* 白色文字 */
   border: none; /* 清除边框 */
   cursor: pointer; /* 鼠标指针样式为指针 */
+  border-radius: 15px;
 }
 </style>

@@ -11,6 +11,7 @@ import (
 	wsLogic "server/internal/logic/ws"
 	"server/internal/ml"
 	"server/internal/router"
+	"server/internal/storage"
 )
 
 type Service interface {
@@ -36,7 +37,8 @@ func (s *service) NewHandlers() router.Handlers {
 	fmt.Println("SQLite db init success")
 
 	return &router.HandlersImpl{
-		AgentHandler: handler.NewAgentHandler(logic.NewAgentLogic(dal.NewAgentDal(db))),
-		WsHandler:    wsHandler.NewWsHandler(wsLogic.NewWsLogic(s.LangChainGoClient.LLM)),
+		AgentHandler:    handler.NewAgentHandler(logic.NewAgentLogic(dal.NewAgentDal(db))),
+		WsHandler:       wsHandler.NewWsHandler(wsLogic.NewWsLogic(s.LangChainGoClient.LLM, storage.NewHistoryMessageManager())),
+		MessagesHandler: handler.NewMessagesHandler(logic.NewMessagesLogic(storage.NewHistoryMessageManager())),
 	}
 }

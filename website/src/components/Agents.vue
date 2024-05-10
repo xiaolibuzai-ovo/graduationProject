@@ -19,9 +19,25 @@
 
       <!-- 右边 -->
       <el-main style="height: 100%; overflow-x: hidden">
+        <h2>
+          Bot Store
+        </h2>
         <!-- div框 -->
         <div class="mainTop">
-          <h1>预留空间</h1>
+          <div class="main-title">
+              Save Earth
+          </div>
+          <div class="main-title-2">
+            Let talk about how to save earth
+          </div>
+          <div class="mainLeft">
+            <div class="mainLeft-img"></div>
+          </div>
+
+          <div class="main-butt"  @click="cardClick(99)">
+            <div>Try it now</div>
+          </div>
+
         </div>
 
         <!-- 卡片list -->
@@ -46,12 +62,13 @@
         </el-row>
       </el-main>
 
-
     </el-container>
   </div>
 </template>
 
 <script>
+
+import tab from "./Tab";
 
 export default {
   name: "system",
@@ -67,6 +84,9 @@ export default {
         },
       ],
     };
+  },
+  components: {
+    'tab': tab
   },
   mounted() {
     this.GetAgents()
@@ -106,10 +126,69 @@ h3 {
 }
 
 .mainTop {
+  position: relative;
   width: 100%;
   height: 300px;
-  border: 1px solid black;
+  /*border: 1px solid black;*/
 }
+
+.main-butt {
+  left: 2%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 150px;
+  height: 50px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  box-sizing: content-box;
+  z-index: 0;
+  cursor: pointer;
+  border-radius: 25px;
+  box-shadow: inset 0 0 6px 2px #888;
+}
+
+.main-title {
+  position: relative;
+  top: 20%;
+  left: 2%;
+  font-size: 30px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+.main-title-2 {
+  position: relative;
+  font-size: 18px;
+  left: 2%;
+  top: 20%;
+}
+
+.mainLeft {
+  position: absolute;
+  right: 2%;
+  bottom: 2%;
+  height: 260px;
+  width: 480px;
+  border: 1px solid black;
+  border-radius: 20px;
+  background-image: url(../assets/save_earth.jpg);
+  background-size: cover; /* 确保图片覆盖整个div */
+}
+
+
+.mainLeft-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  position: absolute;
+  left: 5%;
+  bottom: 4%;
+  background-image: url(../assets/save_earth_img.jpeg);
+  background-size: cover; /* 确保图片覆盖整个div */
+}
+
 
 .center {
   width: 100%;

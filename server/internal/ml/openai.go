@@ -14,16 +14,15 @@ type LangChainGoClient struct {
 	Ctx            context.Context
 	LLM            *openai.LLM
 	OpenaiEmbedder embeddings.Embedder
-	MilvusStore    milvus.Store
+	MilvusStore    *milvus.Store
 }
 
 func NewLangChainGoClient(ctx context.Context) *LangChainGoClient {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		panic("OPENAI_API_KEY NOT SET")
 	}
-
 	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithModel("gpt-3.5-turbo"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
 
@@ -36,13 +35,13 @@ func NewLangChainGoClient(ctx context.Context) *LangChainGoClient {
 		LLM: llm,
 	}
 
-	c.InitEmbedder()
+	c.initEmbedder()
 	c.initMilvusStore()
 
 	return c
 }
 
-func (c *LangChainGoClient) InitEmbedder() {
+func (c *LangChainGoClient) initEmbedder() {
 	embedder, err := embeddings.NewEmbedder(c.LLM)
 	if err != nil {
 		panic(err)
@@ -69,7 +68,7 @@ func (c *LangChainGoClient) initMilvusStore() {
 		opts,
 		milvus.WithEmbedder(e),
 		milvus.WithIndex(idx),
-		milvus.WithCollectionName("collection"),
+		milvus.WithCollectionName("collection1"),
 	)
 	store, err := milvus.New(
 		c.Ctx,
@@ -79,5 +78,5 @@ func (c *LangChainGoClient) initMilvusStore() {
 	if err != nil {
 		panic(err)
 	}
-	c.MilvusStore = store
+	c.MilvusStore = &store
 }
