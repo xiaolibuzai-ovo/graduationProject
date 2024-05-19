@@ -22,7 +22,7 @@ func NewLangChainGoClient(ctx context.Context) *LangChainGoClient {
 		panic("OPENAI_API_KEY NOT SET")
 	}
 	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo"),
+		openai.WithModel("gpt-4o-2024-05-13"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
 
@@ -68,7 +68,8 @@ func (c *LangChainGoClient) initMilvusStore() {
 		opts,
 		milvus.WithEmbedder(e),
 		milvus.WithIndex(idx),
-		milvus.WithCollectionName("collection1"),
+		milvus.WithCollectionName("pdf_collection_tmp"),
+		milvus.WithDropOld(),
 	)
 	store, err := milvus.New(
 		c.Ctx,

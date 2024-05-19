@@ -35,10 +35,14 @@ func NewService() Service {
 func (s *service) NewHandlers() router.Handlers {
 	db := config.InitSQLiteDB()
 	fmt.Println("SQLite db init success")
-
+	gcsClient := config.NewGcs()
+	fmt.Println("gcsClient init success")
+	saveStorageManager := storage.NewHistoryMessageManager()
+	agentStorageManager := storage.NewCommonMessageManager()
 	return &router.HandlersImpl{
-		AgentHandler:    handler.NewAgentHandler(logic.NewAgentLogic(dal.NewAgentDal(db))),
-		WsHandler:       wsHandler.NewWsHandler(wsLogic.NewWsLogic(s.LangChainGoClient.LLM, storage.NewHistoryMessageManager())),
-		MessagesHandler: handler.NewMessagesHandler(logic.NewMessagesLogic(storage.NewHistoryMessageManager())),
+		AgentHandler:    handler.NewAgentHandler(logic.NewAgentLogic(dal.NewAgentDal(db), ml.NewLangChainGoClient(context.Background()))),
+		WsHandler:       wsHandler.NewWsHandler(wsLogic.NewWsLogic(s.LangChainGoClient, saveStorageManager, agentStorageManager, dal.NewAgentDal(db))),
+		MessagesHandler: handler.NewMessagesHandler(logic.NewMessagesLogic(saveStorageManager, agentStorageManager)),
+		CommonHandler:   handler.NewCommonHandler(gcsClient),
 	}
 }

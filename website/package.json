@@ -13,6 +13,8 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@tomiaa/live2d": "^0.0.1",
     "element-ui": "^2.15.14",
+    "marked": "^12.0.2",
+    "showdown": "^2.1.0",
     "vue": "^2.5.2",
     "vue-beautiful-chat": "^2.5.0",
     "vue-live2d": "^1.3.1",

@@ -30,7 +30,7 @@ func main() {
 
 func answer() {
 	prompt := "第1到2周任务是什么"
-	ret, err := useRetriaver(getStore(), prompt, 10)
+	ret, err := useRetriever(getStore(), prompt, 10)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -74,7 +74,7 @@ func addData() {
 
 func Embedding(ctx context.Context, text string) (err error) {
 	// 拿到私有数据Embedding
-	documents, err := textToChunks(text, 5, 2)
+	documents, err := textToChunks(text)
 	if err != nil {
 		return
 	}
@@ -93,8 +93,8 @@ func Embedding(ctx context.Context, text string) (err error) {
 	return
 }
 
-// useRetriaver 函数使用检索器
-func useRetriaver(store *milvus.Store, prompt string, topk int) ([]schema.Document, error) {
+// useRetriever 函数使用检索器
+func useRetriever(store *milvus.Store, prompt string, topk int) ([]schema.Document, error) {
 	// 设置选项向量
 	optionsVector := []vectorstores.Option{
 		vectorstores.WithScoreThreshold(0.80), // 设置分数阈值
@@ -142,16 +142,12 @@ func GetAnswer(ctx context.Context, llm llms.Model, docRetrieved []schema.Docume
 }
 
 // textToChunks 函数将文本文件转换为文档块
-func textToChunks(content string, chunkSize, chunkOverlap int) ([]schema.Document, error) {
+func textToChunks(content string) ([]schema.Document, error) {
 	reader := strings.NewReader(content)
 	// 创建一个新的文本文档加载器
 	docLoaded := documentloaders.NewText(reader)
 	// 创建一个新的递归字符文本分割器
 	split := textsplitter.NewRecursiveCharacter()
-	// 设置块大小
-	split.ChunkSize = chunkSize
-	// 设置块重叠大小
-	split.ChunkOverlap = chunkOverlap
 	// 加载并分割文档
 	docs, err := docLoaded.LoadAndSplit(context.Background(), split)
 	if err != nil {
@@ -204,12 +200,12 @@ func getStore(opts ...milvus.Option) *milvus.Store {
 	if err != nil {
 		panic(err)
 	}
-	//var opts []milvus.Option
 	opts = append(
 		opts,
 		milvus.WithEmbedder(embedder),
 		milvus.WithIndex(idx),
-		milvus.WithCollectionName("collection1"),
+		milvus.WithCollectionName("pdf_collection_tmp"),
+		milvus.WithDropOld(),
 	)
 	store, err := milvus.New(
 		ctx,

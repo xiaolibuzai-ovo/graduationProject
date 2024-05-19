@@ -25,7 +25,8 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 			agentApi.POST("detail", handlers.AgentDetail)
 			agentApi.POST("embedding", handlers.Embedding) // 嵌入向量
 			agentApi.POST("paper", handlers.PaperAgent)
-			agentApi.POST("suggests")
+			//agentApi.POST("suggests", handlers.Suggests)
+			agentApi.POST("loadPdfData", handlers.LoadPdfData)
 		}
 		wsApi := api.Group("ws")
 		{
@@ -35,6 +36,11 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 		msgApi := api.Group("message")
 		{
 			msgApi.POST("messages", handlers.GetHistoryMessage)
+			msgApi.POST("delete", handlers.DeleteHistoryMessage)
+		}
+		commonApi := api.Group("common")
+		{
+			commonApi.POST("upload", handlers.UploadFile)
 		}
 	}
 	router.NoRoute(func(c *gin.Context) {

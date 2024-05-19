@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"server/internal/dto"
 	"server/internal/logic"
@@ -13,6 +14,7 @@ type AgentHandler interface {
 	Embedding(c *gin.Context)
 	PaperAgent(c *gin.Context)
 	Suggests(c *gin.Context)
+	LoadPdfData(c *gin.Context)
 }
 
 type agentHandler struct {
@@ -77,8 +79,25 @@ func (a *agentHandler) Suggests(c *gin.Context) {
 	}
 	data, err := a.AgentLogic.Suggests(c.Request.Context(), req)
 	if err != nil {
+		fmt.Println("[Suggests] Suggests err", err)
 		utils.ErrorInternalServerResponse(c, err)
 		return
 	}
 	utils.SuccessResponse(c, &dto.SuggestsResp{SuggestsData: data})
+}
+
+func (a *agentHandler) LoadPdfData(c *gin.Context) {
+	req := new(dto.LoadPdfReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		utils.ErrorBadRequestResponse(c, err)
+		return
+	}
+	fmt.Println(req.Files)
+	err := a.AgentLogic.LoadPdfData(c.Request.Context(), req)
+	if err != nil {
+		fmt.Println("[Suggests] Suggests err", err)
+		utils.ErrorInternalServerResponse(c, err)
+		return
+	}
+	utils.SuccessResponse(c, nil)
 }

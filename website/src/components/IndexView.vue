@@ -86,9 +86,9 @@ export default {
   data() {
     return {
       activeName: '',
-      originalText1: "我想了解我邯郸的人口密度和居住分布情况,请对数据分析后介绍一下近10年变化规律", // 原始文本
-      originalText2: "我想获取邯郸的地形和地貌数据,请帮我查询数据并返回数据来源和介绍", // 原始文本
-      originalText3: "我当前位置附近的最近医院是哪家? ", // 原始文本
+      originalText1: "你认为人类活动对地球生态系统造成了怎样的影响？", // 原始文本
+      originalText2: "你认为气候变化对地球生态系统的影响有哪些？", // 原始文本
+      originalText3: "你觉得我们应该如何平衡经济发展和环境保护？", // 原始文本
       tab1Text1: "", // 逐字显示的文本
       tab1Text2: "", // 逐字显示的文本
       tab1Text3: "", // 逐字显示的文本
