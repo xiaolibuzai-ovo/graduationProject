@@ -4,6 +4,7 @@ import IndexView from '@/components/IndexView'
 import HomeView from '@/components/HomeView'
 import Chat from '@/components/Chat'
 import Agents from '@/components/Agents'
+import Login from '@/components/login'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/agents',
       name: 'agents',
       component: Agents
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
     }
   ]
 })

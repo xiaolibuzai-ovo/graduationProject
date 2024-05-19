@@ -27,7 +27,6 @@ func (m *messagesLogic) GetHistoryMessage(ctx context.Context, req *dto.HistoryM
 	if req.AgentId == 99 {
 		return m.HistoryMessageManager.GetSaveEarthAgentMessage(), nil
 	}
-
 	return m.CommonMessageManager.GetAgentMessageById(req.AgentId), nil
 }
 

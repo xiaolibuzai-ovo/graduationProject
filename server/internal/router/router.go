@@ -24,8 +24,7 @@ func NewRouter(handlers Handlers) (http.Handler, error) {
 			agentApi.GET("list", handlers.AgentList)
 			agentApi.POST("detail", handlers.AgentDetail)
 			agentApi.POST("embedding", handlers.Embedding) // 嵌入向量
-			agentApi.POST("paper", handlers.PaperAgent)
-			//agentApi.POST("suggests", handlers.Suggests)
+			agentApi.POST("suggests", handlers.Suggests)
 			agentApi.POST("loadPdfData", handlers.LoadPdfData)
 		}
 		wsApi := api.Group("ws")

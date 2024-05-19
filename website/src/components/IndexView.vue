@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <tab></tab>
+    <tab v-if="logined"></tab>
+    <el-button class="login_btn" v-if="!logined" type="primary" @click="login">登陆</el-button>
     <vue-particles
       class="app-bg"
       color="#dedede"
@@ -32,7 +33,7 @@
     </div>
 
     <router-link to="home">
-      <div class="box">
+      <div class="box" v-if="logined">
         <div class="butt">
           <div>开始使用</div>
         </div>
@@ -80,6 +81,7 @@
 </template>
 <script>
 import tab from './Tab'
+import Vue from "vue";
 
 export default {
   name: "sysindextem",
@@ -93,7 +95,8 @@ export default {
       tab1Text2: "", // 逐字显示的文本
       tab1Text3: "", // 逐字显示的文本
       currentIndex: 0, // 当前显示到的字符索引
-      typingSpeed: 30 // 打字速度（毫秒）
+      typingSpeed: 30, // 打字速度（毫秒）
+      logined: false
     };
   },
   components: {
@@ -101,8 +104,18 @@ export default {
   },
   mounted() {
     this.startTyping1(true)
+    this.loadLogined()
   },
   methods: {
+    loadLogined() {
+      this.logined = Vue.prototype.$logined
+    },
+    login() {
+      this.$router.push({
+        path: '/login',
+      });
+      this.logined = true
+    },
     handleClick() {
       console.log(this.activeName);
       this.$router.push(`/${this.activeName}`);
@@ -164,6 +177,13 @@ export default {
 
 /deep/ .el-tabs__item:hover {
   color: rgb(0, 191, 255); /* 鼠标移入时设置为蓝色 */
+}
+
+.login_btn {
+  position: fixed;
+  right: 5%;
+  top: 3%;
+  z-index: 99999;
 }
 
 .app-bg {

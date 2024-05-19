@@ -11,6 +11,7 @@ Vue.use(VueParticles)
 Vue.config.productionTip = false
 Vue.use(ElementUI);
 /* eslint-disable no-new */
+Vue.prototype.$logined = false;
 new Vue({
   el: '#app',
   router,

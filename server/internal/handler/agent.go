@@ -12,7 +12,6 @@ type AgentHandler interface {
 	AgentList(c *gin.Context)
 	AgentDetail(c *gin.Context)
 	Embedding(c *gin.Context)
-	PaperAgent(c *gin.Context)
 	Suggests(c *gin.Context)
 	LoadPdfData(c *gin.Context)
 }
@@ -65,10 +64,6 @@ func (a *agentHandler) Embedding(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, nil)
-}
-
-func (a *agentHandler) PaperAgent(c *gin.Context) {
-
 }
 
 func (a *agentHandler) Suggests(c *gin.Context) {

@@ -3,7 +3,7 @@
 <!--    <img src="../assets/logo_index.png" alt="" class="tab-image"/>-->
     <el-tabs type="card" v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="Chat" name="agents"></el-tab-pane>
-      <el-tab-pane label="About" name="Chat"></el-tab-pane>
+<!--      <el-tab-pane label="About" name="Chat"></el-tab-pane>-->
     </el-tabs>
   </div>
 </template>

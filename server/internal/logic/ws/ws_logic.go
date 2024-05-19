@@ -18,8 +18,9 @@ import (
 )
 
 type WsLogic interface {
+	GetAgentInfo(ctx context.Context, agentId int64) (agents []*dal.Agents, err error)
 	GetSupportFile(ctx context.Context, agentId int64) (supportFile int16, err error)
-	SendQuestion(ctx context.Context, req *dto.SendQuestionReq, message string, supportFile int16, msgChan, nextSuggestion chan<- string) error
+	SendQuestion(ctx context.Context, req *dto.SendQuestionReq, message string, agent *dal.Agents, msgChan, nextSuggestion chan<- string) error
 	SaveEarthAgent(ctx context.Context, message string, SaveEarthAgentChan chan<- string, nextSuggestion chan<- string) error
 }
 
@@ -39,6 +40,14 @@ func NewWsLogic(langChainGo *ml.LangChainGoClient, storage1 storage.HistoryMessa
 	}
 }
 
+func (w *wsLogic) GetAgentInfo(ctx context.Context, agentId int64) (agents []*dal.Agents, err error) {
+	agents, err = w.AgentDal.GetAgentsById(ctx, int32(agentId))
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (w *wsLogic) GetSupportFile(ctx context.Context, agentId int64) (supportFile int16, err error) {
 	agentList, err := w.AgentDal.GetAgentsById(ctx, int32(agentId))
 	if err != nil {
@@ -50,19 +59,19 @@ func (w *wsLogic) GetSupportFile(ctx context.Context, agentId int64) (supportFil
 	return agentList[0].SupportFile, nil
 }
 
-func (w *wsLogic) SendQuestion(ctx context.Context, req *dto.SendQuestionReq, message string, supportFile int16, msgChan, nextSuggestion chan<- string) error {
-	switch supportFile {
-	case 0: // false
-		return w.sendTextQuestion(ctx, req, message, msgChan, nextSuggestion)
-	case 1:
-		return w.sendFileQuestion(ctx, req, message, msgChan, nextSuggestion)
-	}
-	return nil
+func (w *wsLogic) SendQuestion(ctx context.Context, req *dto.SendQuestionReq, message string, agent *dal.Agents, msgChan, nextSuggestion chan<- string) error {
+	//switch supportFile {
+	//case 0: // false
+	return w.sendTextQuestion(ctx, req, agent, message, msgChan, nextSuggestion)
+	//case 1:
+	//	return w.sendFileQuestion(ctx, req, message, msgChan, nextSuggestion)
+	//}
+	//return nil
 }
 
-func (w *wsLogic) sendTextQuestion(ctx context.Context, req *dto.SendQuestionReq, message string, msgChan, nextSuggestion chan<- string) error {
+func (w *wsLogic) sendTextQuestion(ctx context.Context, req *dto.SendQuestionReq, agent *dal.Agents, message string, msgChan, nextSuggestion chan<- string) error {
 	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, "You are a professor of geography. "),
+		llms.TextParts(llms.ChatMessageTypeSystem, agent.Prompt),
 		llms.TextParts(llms.ChatMessageTypeHuman, message),
 	}
 	response, err := w.langChainGo.LLM.GenerateContent(ctx, messages, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
@@ -80,16 +89,14 @@ func (w *wsLogic) sendTextQuestion(ctx context.Context, req *dto.SendQuestionReq
 	fmt.Println("close msgChan")
 
 	// 存储消息记录
-	go func() {
-		w.AddAgentMessageById(int32(req.AgentId), &dto.HistoryMessageResp{
-			Text:   message,
-			Sender: dto.SenderUser,
-		})
-		w.AddAgentMessageById(int32(req.AgentId), &dto.HistoryMessageResp{
-			Text:   response.Choices[0].Content,
-			Sender: dto.SenderAI,
-		})
-	}()
+	w.AddAgentMessageById(int32(req.AgentId), &dto.HistoryMessageResp{
+		Text:   message,
+		Sender: dto.SenderUser,
+	})
+	w.AddAgentMessageById(int32(req.AgentId), &dto.HistoryMessageResp{
+		Text:   response.Choices[0].Content,
+		Sender: dto.SenderAI,
+	})
 
 	// 下一步建议
 	err = w.nextSuggest(ctx, messages, response.Choices[0].Content, nextSuggestion)

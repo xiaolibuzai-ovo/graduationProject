@@ -4,9 +4,9 @@
     <el-button class="back-btn" type="primary" @click="clickMenu">返回</el-button>
     <!--    <input v-if="supportFile" class="sendInput" type="file" @change="handleFileUpload">-->
 
-    <el-button class="sendInput" type="primary" v-if="supportFile" @click="triggerFileInput">选择文件</el-button>
-    <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none"/>
-    <el-button class="embeddingBtn" type="primary" v-if="this.uploadedFiles.length" @click="embedding">嵌入向量</el-button>
+    <!--    <el-button class="sendInput" type="primary" v-if="supportFile" @click="triggerFileInput">选择文件</el-button>-->
+    <!--    <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none"/>-->
+    <!--    <el-button class="embeddingBtn" type="primary" v-if="this.uploadedFiles.length" @click="embedding">嵌入向量</el-button>-->
 
 
     <div class="chat-messages-container">
@@ -303,7 +303,8 @@ export default {
       if (this.$route.query.id === '99') {
         wsUrl = 'ws://localhost:8888/api/ws/saveEarthAgent'
       } else {
-        wsUrl = `ws://localhost:8888/api/ws/send?agentId=${encodeURIComponent(parseInt(this.$route.query.id))}`
+        console.log(this.agentId)
+        wsUrl = `ws://localhost:8888/api/ws/send?agentId=${this.agentId}`;
       }
       // 创建WebSocket连接
       this.socket = new w3cwebsocket(wsUrl); // 这里替换成你的WebSocket服务器地址

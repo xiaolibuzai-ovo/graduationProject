@@ -25,7 +25,7 @@
         <!-- div框 -->
         <div class="mainTop">
           <div class="main-title">
-              Save Earth
+            Save Earth
           </div>
           <div class="main-title-2">
             Let talk about how to save earth
@@ -34,7 +34,7 @@
             <div class="mainLeft-img"></div>
           </div>
 
-          <div class="main-butt"  @click="cardClick(99)">
+          <div class="main-butt" @click="cardClick(99)">
             <div>Try it now</div>
           </div>
 
@@ -43,7 +43,7 @@
         <!-- 卡片list -->
         <el-row style="padding: 20px 20px" :gutter="20">
           <el-col
-            style="margin: 10px 0; cursor: pointer;"
+            style="margin: 10px 0; cursor: pointer; "
             :span="8"
             v-for="(item, index) in list"
             :key="index"
@@ -215,6 +215,7 @@ h3 {
 .carMain {
   padding: 20px 20px;
   display: flex;
+  height: 150px;
 }
 
 .subtitle {

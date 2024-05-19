@@ -8,6 +8,7 @@ import (
 	"server/internal/dto"
 	"server/internal/logic/ws"
 	"server/internal/utils"
+	"strconv"
 )
 
 type WsHandler interface {
@@ -28,16 +29,14 @@ func NewWsHandler(
 }
 
 func (w *wsHandler) SendQuestion(c *gin.Context) {
-	req := new(dto.SendQuestionReq)
-	if err := c.ShouldBindQuery(req); err != nil {
-		fmt.Printf("[SendQuestion] ShouldBindJSON err,err=%v", err)
-		utils.ErrorBadRequestResponse(c, err)
+	query := c.Query("agentId")
+	agentId, err := strconv.ParseInt(query, 10, 64)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	supportFile, err := w.WsLogic.GetSupportFile(c.Request.Context(), req.AgentId)
+	agents, err := w.WsLogic.GetAgentInfo(c.Request.Context(), agentId)
 	if err != nil {
-		fmt.Printf("[SendQuestion] GetSupportFile err,err=%v", err)
-		utils.ErrorInternalServerResponse(c, err)
 		return
 	}
 	// 获取WebSocket连接
@@ -59,7 +58,7 @@ func (w *wsHandler) SendQuestion(c *gin.Context) {
 			nextSuggestion = make(chan string, 10)
 		)
 		go func() {
-			err = w.WsLogic.SendQuestion(c.Request.Context(), req, string(message), supportFile, msgChan, nextSuggestion)
+			err = w.WsLogic.SendQuestion(c.Request.Context(), &dto.SendQuestionReq{AgentId: agentId}, string(message), agents[0], msgChan, nextSuggestion)
 			if err != nil {
 				fmt.Printf("[SendQuestion] SendQuestion err,err=%v", err)
 			}
